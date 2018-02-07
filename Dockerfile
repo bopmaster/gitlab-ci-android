@@ -27,6 +27,14 @@ RUN apt-get -qq update && \
       lib32ncurses5 \
       lib32z1 \
       unzip \
+      qtbase5-dev \		
+      qtdeclarative5-dev \		
+      wget \		
+      qemu-kvm \		
+      build-essential \		
+      python2.7 \		
+      python2.7-dev \		
+      yamdi \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN rm -f /etc/ssl/certs/java/cacerts; \
