@@ -8,23 +8,10 @@ ENV ANDROID_SDK_HOME /opt/android-sdk-linux
 ENV ANDROID_SDK_ROOT /opt/android-sdk-linux
 ENV ANDROID_HOME /opt/android-sdk-linux
 ENV ANDROID_SDK /opt/android-sdk-linux
-
+  
 # Install Required Tools
 RUN apk -U update && apk -U add \
-  bash \
-  ca-certificates \
-  curl \
-  expect \
-  git \
-  libstdc++ \
-  libgcc \
-  su-exec \
-  ncurses \
-  unzip \
-  wget \
-  zlib \
   html2text \
-  openjdk-8-jdk \
   libc6-i386 \
   lib32stdc++6 \
   lib32gcc1 \
@@ -36,8 +23,18 @@ RUN apk -U update && apk -U add \
   qemu-kvm \
   build-essential \
   python2.7 \
-  python2.7-dev \
   yamdi \
+  bash \
+  ca-certificates \
+  curl \
+  expect \
+  git \
+  libstdc++ \
+  libgcc \
+  su-exec \
+  ncurses \
+  wget \
+  zlib \
   && wget https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub -O /etc/apk/keys/sgerrand.rsa.pub \
 	&& wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk -O /tmp/glibc.apk \
 	&& wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk -O /tmp/glibc-bin.apk \
