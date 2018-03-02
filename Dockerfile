@@ -53,6 +53,10 @@ RUN mkdir -p /opt/android-sdk-linux \
 # Copy Tools
 COPY tools /opt/tools
 
+# Recording tools
+RUN wget -nv https://pypi.python.org/packages/1e/8e/40c71faa24e19dab555eeb25d6c07efbc503e98b0344f0b4c3131f59947f/vnc2flv-20100207.tar.gz && tar -zxvf vnc2flv-20100207.tar.gz && rm vnc2flv-20100207.tar.gz && \
+    cd vnc2flv-20100207 && ln -s /usr/bin/python2.7 /usr/bin/python && python setup.py install
+    
 # Copy Licenses
 COPY licenses /opt/licenses
 
