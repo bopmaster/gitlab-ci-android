@@ -1,59 +1,63 @@
-#
-# GitLab CI: Android v0.2
-#
-# https://hub.docker.com/r/jangrewe/gitlab-ci-android/
-# https://git.faked.org/jan/gitlab-ci-android
-#
+FROM openjdk:8-jdk-alpine
 
-FROM ubuntu:17.10
-MAINTAINER Jan Grewe <jan@faked.org>
+LABEL de.mindrunner.android-docker.flavour="alpine-standalone"
 
-ENV VERSION_SDK_TOOLS "3859397"
+ARG GLIBC_VERSION="2.26-r0"
 
-ENV ANDROID_HOME "/sdk"
-ENV PATH "$PATH:${ANDROID_HOME}/tools"
-ENV DEBIAN_FRONTEND noninteractive
+ENV ANDROID_SDK_HOME /opt/android-sdk-linux
+ENV ANDROID_SDK_ROOT /opt/android-sdk-linux
+ENV ANDROID_HOME /opt/android-sdk-linux
+ENV ANDROID_SDK /opt/android-sdk-linux
 
-RUN apt-get -qq update && \
-    apt-get install -qqy --no-install-recommends \
-      bzip2 \
-      curl \
-      git-core \
-      html2text \
-      openjdk-8-jdk \
-      libc6-i386 \
-      lib32stdc++6 \
-      lib32gcc1 \
-      lib32ncurses5 \
-      lib32z1 \
-      unzip \
-      qtbase5-dev \		
-      qtdeclarative5-dev \		
-      wget \		
-      qemu-kvm \		
-      build-essential \		
-      python2.7 \		
-      python2.7-dev \		
-      yamdi \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Install Required Tools
+RUN apk -U update && apk -U add \
+  bash \
+  ca-certificates \
+  curl \
+  expect \
+  git \
+  libstdc++ \
+  libgcc \
+  su-exec \
+  ncurses \
+  unzip \
+  wget \
+  zlib \
+  html2text \
+  openjdk-8-jdk \
+  libc6-i386 \
+  lib32stdc++6 \
+  lib32gcc1 \
+  lib32ncurses5 \
+  lib32z1 \
+  unzip \
+  qtbase5-dev \
+  qtdeclarative5-dev \
+  qemu-kvm \
+  build-essential \
+  python2.7 \
+  python2.7-dev \
+  yamdi \
+  && wget https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub -O /etc/apk/keys/sgerrand.rsa.pub \
+	&& wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk -O /tmp/glibc.apk \
+	&& wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk -O /tmp/glibc-bin.apk \
+	&& apk add /tmp/glibc.apk /tmp/glibc-bin.apk \
+  && rm -rf /tmp/* \
+	&& rm -rf /var/cache/apk/*
 
-RUN rm -f /etc/ssl/certs/java/cacerts; \
-    /var/lib/dpkg/info/ca-certificates-java.postinst configure
+# Create android User
+RUN mkdir -p /opt/android-sdk-linux \
+  && addgroup android \
+  && adduser android -D -G android -h /opt/android-sdk-linux
 
-RUN curl -s https://dl.google.com/android/repository/sdk-tools-linux-${VERSION_SDK_TOOLS}.zip > /sdk.zip && \
-    unzip /sdk.zip -d /sdk && \
-    rm -v /sdk.zip
+# Copy Tools
+COPY tools /opt/tools
 
-RUN mkdir -p $ANDROID_HOME/licenses/ \
-  && echo "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > $ANDROID_HOME/licenses/android-sdk-license \
-  && echo "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910" > $ANDROID_HOME/licenses/android-sdk-preview-license
+# Copy Licenses
+COPY licenses /opt/licenses
 
-ADD packages.txt /sdk
-RUN mkdir -p /root/.android && \
-  touch /root/.android/repositories.cfg && \
-  ${ANDROID_HOME}/tools/bin/sdkmanager --update 
+# Working Directory
+WORKDIR /opt/android-sdk-linux
 
-RUN while read -r package; do PACKAGES="${PACKAGES}${package} "; done < /sdk/packages.txt && \
-    ${ANDROID_HOME}/tools/bin/sdkmanager ${PACKAGES}
-
-RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses
+RUN /opt/tools/entrypoint.sh built-in
+CMD /opt/tools/entrypoint.sh built-in
