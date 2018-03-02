@@ -10,6 +10,7 @@ ENV ANDROID_HOME /opt/android-sdk-linux
 ENV ANDROID_SDK /opt/android-sdk-linux
   
 # Install Required Tools
+RUN apk add --no-cache build-base
 RUN apk -U update && apk -U add \
   html2text \
   libc6-i386 \
